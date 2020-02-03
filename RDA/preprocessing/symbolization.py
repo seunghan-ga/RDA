@@ -105,13 +105,15 @@ def symbol_baskets(X, n_alphabet):
         if lower in line or upper in line:
             idx_t = np.where(line == upper)[0]
             idx_b = np.where(line == lower)[0]
+
             t_line = ["%s.%s" % (ti, line[ti]) for ti in idx_t]
             b_line = ["%s.%s" % (bi, line[bi]) for bi in idx_b]
+            items = b_line + t_line
 
             basket_id.append(i)
-            basket.append(np.concatenate((t_line, b_line)).tolist())
+            basket.append(items)
 
-    return np.array(basket_id), np.array(basket)
+    return basket_id, basket
 
 
 def symbol_sequence_baskets(X, n_alphabet):

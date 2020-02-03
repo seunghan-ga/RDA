@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
-from scipy.stats import beta, f, chisquare
+from scipy.stats import beta
 import numpy as np
 
 
-def tsquare_single(data, size, lcl=None, ucl=None, center=None, newdata=None):
-    _title = "T-square Single Chart"
-
+def tsquare_single(data, size, lcl=None, ucl=None, center=None):
+    """
+    Calculate Hotelling's T2 score
+    :param data: Input array.
+    :param size: Number of columns
+    :param lcl: Lower control limit value
+    :param ucl: Upper control limit value
+    :param center: center value
+    :return: T2 score, center, lcl, ucl
+    """
     data = np.array(data)
-    numsample = data.__len__()
+    numsample = len(data)
 
     colmean = np.mean(data, axis=0)
     matcov = np.cov(data.T)
@@ -16,7 +23,7 @@ def tsquare_single(data, size, lcl=None, ucl=None, center=None, newdata=None):
     values = []
     for sample in data:
         dif = sample - colmean
-        value = matinv.dot(dif.T).dot(dif)
+        value = dif.T @ matinv @ dif
         values.append(value)
 
     cl = ((numsample - 1) ** 2) / numsample
@@ -28,70 +35,57 @@ def tsquare_single(data, size, lcl=None, ucl=None, center=None, newdata=None):
     if center is None:
         center = cl * beta.ppf(0.5, size / 2, (numsample - size - 1) / 2)
 
-    return values, center, lcl, ucl, _title
+    return np.array(values), center, lcl, ucl
 
 
-# test
-def tsquare_double(data, size, newdata=None):
-    _title = "T-square Double Chart"
+def tsquare_decomposition(data, columns):
+    """
+    Decompose T2 score
+    :param data: Input array
+    :param columns: t2 columns
+    :return: Decomposed T2 scores
+    """
+    t2_scores = []
+    for col in columns:
+        cols = columns[:]
+        cols.remove(col)
+        score, _, _, _ = tsquare_single(data[cols], len(cols))
+        t2_scores.append(score)
 
-    sizes = data[:, 0]
-    sample = data[:, 1:]
-
-    samples = dict()
-    for n, value in zip(sizes, sample):
-        if n in samples:
-            samples[n] = np.vstack([samples[n], value])
-        else:
-            samples[n] = value
-
-    m = len(samples.keys())
-    n = len(samples[1])
-    p = len(samples[1].T)
-
-    variance, S = [], []
-    for i in range(m):
-        mat = np.cov(samples[i + 1].T, ddof=1)
-        variance.append(mat.diagonal())
-        for j in range(1, mat.shape[0]):
-            cov = np.hstack((np.array([]), mat.diagonal(i)))
-        S.append(cov)
-
-    variance, S = np.array(variance), np.array(S)
-
-    means = np.array([samples[xs + 1].mean(axis=0) for xs in range(m)])
-    means_total = means.mean(axis=0)
-
-    varmean = variance.mean(axis=0)
-    smean = S.mean(axis=0)
-    n = len(varmean)
-    mat = np.zeros(shape=(n, n)) + np.diag(varmean)
-
-    a, b = 0, n - 1
-    for i in range(1, n):
-        mat = mat + np.diag(smean[a:b], k=i) + np.diag(smean[a:b], k=-i)
-        a, b = b, (b + (b - 1))
-
-    Smat = mat
-    Smat_inv = np.linalg.inv(Smat)
-
-    values = []
-    for i in range(m):
-        a = means[i] - means_total
-        values.append(5 * a @ Smat_inv @ a.T)
-
-    p1 = (p * (m - 1) * (n - 1))
-    p2 = (m * n - m - p + 1)
-    lcl = (p1 / p2) * f.ppf(0.00135, p, p2)
-    center = (p1 / p2) * f.ppf(0.50, p, p2)
-    ucl = (p1 / p2) * f.ppf(0.99865, p, p2)
-
-    return values, center, lcl, ucl, _title
+    return np.array(t2_scores)
 
 
-def ewma(data, size, target=None, weight=0.2, newdata=None):
-    _title = "EWMA Chart"
+def tsquare_residual(all_score, decompose_score):
+    """
+    Calculate residual
+    :param all_score: All variable score
+    :param decompose_score: decomposed score
+    :return: residual array
+    """
+    residual = []
+    for score in decompose_score:
+        residual.append(all_score - score)
 
+    return np.array(residual)
+
+
+def ano_score_idx(t2_score, lcl=None, ucl=None):
+    """
+    Anomaly detection
+    :param t2_score: T2 score array
+    :param lcl: Lower control limit value
+    :param ucl: Upper control limit value
+    :return: Anomaly point index
+    """
+    ano_idx = []
+    for idx in range(len(t2_score)):
+        if ucl < t2_score[idx]:
+            ano_idx.append(idx)
+
+    return ano_idx
+
+
+def ewma(data, size, target=None, weight=0.2):
     assert ((weight > 0) and (weight < 1))
 
     if size > 1:
@@ -116,4 +110,4 @@ def ewma(data, size, target=None, weight=0.2, newdata=None):
         lcl.append(target - 3 * (std) * np.sqrt((weight / (2 - weight)) * (1 - (1 - weight) ** (2 * i))))
         ucl.append(target + 3 * (std) * np.sqrt((weight / (2 - weight)) * (1 - (1 - weight) ** (2 * i))))
 
-    return ewma, target, lcl, ucl, _title
+    return np.array(ewma), target, lcl, ucl

@@ -1,45 +1,20 @@
 # -*- coding: utf-8 -*-
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-import pandas as pd
+import numpy as np
 
 
-def computePCA(df, features, n=2):
-    # Separating out the features
-    data = df.loc[:, features].values
-
-    # Standardizing the features
-    data = StandardScaler().fit_transform(data)
-
-    # Create columns
-    cols = []
-    for i in range(n):
-        col = "PC_%d" % (i + 1)
-        cols.append(col)
-
-    # Compute PCA
+def pca_transform(X, n=2):
+    """
+    Principal component analysis. (PCA)
+    :param X: Input array.
+    :param n: Number of PC.
+    :return: PC transformer.
+    """
+    data = np.array(X)
     pca = PCA(n_components=n)
-    transformed = pca.fit_transform(data)
-    score = pd.DataFrame(data=transformed, columns=cols)
+    transformer = pca.fit(data)
 
-    return score
-
-
-# ing 2019-06-10
-def computeLDA(df, features, n=2):
-    X = df.values
-    y = []
-    for i in range(len(X)):
-        # y.append()
-        pass
-
-    print(X)
-    lda = LinearDiscriminantAnalysis(n_components=n)
-
-    X_r2 = lda.fit(X, y).transform(X)
-
-    return X_r2
+    return transformer
 
 
 if __name__ == "__main__":
