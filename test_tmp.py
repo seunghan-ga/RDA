@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from RDA.preprocessing import symbolization
+from RDA.analysis import ruleDiscovery
 from RDA.databases import hadoop
-from apyori import apriori
+# from apyori import apriori
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
+import tensorflow as tf
 
 
 features = ["duration", "protocol_type", "service", "flag", "src_bytes", "dst_bytes", "land", "wrong_fragment",
@@ -17,46 +20,35 @@ features = ["duration", "protocol_type", "service", "flag", "src_bytes", "dst_by
 
 
 if __name__ == "__main__":
-    # kddcup_data = pd.read_csv("samples/kddcup.data.corrected")
-    # kddcup_data.columns = features
+    kddcup_data = pd.read_csv("samples/kddcup.data.corrected")
+    kddcup_data.columns = features
+
+    # db_info = {
+    #     "host": "192.168.1.103",
+    #     "port": 21050,
+    #     "db": "demo"
+    # }
     #
-    # data_norm = symbolization.z_score_norm(kddcup_data[features[4:-1]].to_numpy()[:50])
-    db_info = {
-        "host": "192.168.1.103",
-        "port": 21050,
-        "db": "demo"
-    }
+    # connector = hadoop.impala_handler()
+    # connector.connect(**db_info)
+    # all_data = connector.select('select * from bearing order by idx_date asc;')
+    # cols = all_data.columns.tolist()
+    # connector.close()
 
-    connector = hadoop.impala_handler()
-    connector.connect(**db_info)
-    all_data = connector.select('select * from bearing order by idx_date asc;')
-    cols = all_data.columns.tolist()
-    connector.close()
+    # data_norm = symbolization.z_score_norm(all_data[cols[1:]].to_numpy())
+    data_norm = symbolization.z_score_norm(kddcup_data[features[4:-1]].to_numpy()[:10])
 
-    data_norm = symbolization.z_score_norm(all_data[cols[1:]].to_numpy())
     n_segmentation = int(data_norm.shape[0] / 2)
-    n_alphabet = 10
+    n_alphabet = 3
 
     paa = symbolization.paa(data_norm, n_seg=n_segmentation)
     sax = symbolization.sax(paa, n_alphabet)
     id, basket = symbolization.symbol_baskets(sax, n_alphabet)
 
-    # print(np.array(basket))
-    # res = list(apriori(basket))
-    # for item in res:
-    #     print(item)
+    symbolization.symbol_sequence_baskets(sax, 1, n_alphabet)
 
-    print("========================================================================================")
+    kwargs = {"max_length": 2, "min_support": 0.1, "min_confidenc": 0.5, "min_lift": 2}
+    res = ruleDiscovery.association_rule_discovery(basket, **kwargs)
+    # for i in res:
+    #     print(i)
 
-    res = list(apriori(basket, max_length=3, min_lift=2))
-    print(len(res))
-
-    for idx in range(len(res)):
-        line = res[idx]
-        if len(line[0]) > 1:
-            print("basket id : ", id[idx])
-            print("items :", list(line[0]), " support :", line[1])
-
-            for item in line[2][1:]:
-                print(list(item[0]), " -> ", list(item[1]), " confidence :", item[2], " lift :", item[3])
-            print("========================================================================================")

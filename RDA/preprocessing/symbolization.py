@@ -110,14 +110,28 @@ def symbol_baskets(X, n_alphabet):
             b_line = ["%s.%s" % (bi, line[bi]) for bi in idx_b]
             items = b_line + t_line
 
-            basket_id.append(i)
+            basket_id.append([i])
             basket.append(items)
 
     return basket_id, basket
 
 
-def symbol_sequence_baskets(X, n_alphabet):
-    pass
+def symbol_sequence_baskets(X, id, n_alphabet):
+    basket_id, basket = symbol_baskets(X, n_alphabet)
+    s_id = [[id] for i in range(len(basket_id))]
+
+    s_basket = []
+    for i in range(len(s_id)):
+        s_basket.append([s_id[i], basket_id[i], basket[i]])
+
+    print(np.array(s_basket))
+
+    from pycspade.helpers import spade, print_result
+
+    # To get raw SPADE output
+    result = spade(data=s_basket, support=0.3, parse=False)
+    print_result(result)
+
 
 
 if __name__ == "__main__":
