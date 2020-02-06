@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from tqdm import tqdm
 import numpy as np
+import sys
 
 
 def z_score_norm(X):
@@ -106,32 +107,52 @@ def symbol_baskets(X, n_alphabet):
             idx_t = np.where(line == upper)[0]
             idx_b = np.where(line == lower)[0]
 
-            t_line = ["%s.%s" % (ti, line[ti]) for ti in idx_t]
-            b_line = ["%s.%s" % (bi, line[bi]) for bi in idx_b]
-            items = b_line + t_line
+            t_line, b_line = [], []
+            for ti in idx_t:
+                t_line.append("%s.%s" % (ti, line[ti]))
+            for bi in idx_b:
+                b_line.append("%s.%s" % (bi, line[bi]))
 
-            basket_id.append([i])
+            # t_line = ["%s.%s" % (ti, line[ti]) for ti in idx_t]
+            # b_line = ["%s.%s" % (bi, line[bi]) for bi in idx_b]
+            items = np.concatenate((b_line, t_line)).tolist()
+
+            basket_id.append(i)
             basket.append(items)
 
     return basket_id, basket
 
 
-def symbol_sequence_baskets(X, id, n_alphabet):
+def flatten_unique(X):
+    unique = []
+    for line in X:
+        unique = np.concatenate((unique, line[2]))
+
+    unique = np.unique(unique)
+
+    return unique
+
+
+def idx_value_convert(X, idx):
+    res = []
+    for i in range(len(X)):
+        tmp = []
+        for j in range(len(X[i][2])):
+            tmp.append(np.where(idx == X[i][2][j])[0][0])
+        res.append([X[i][0], X[i][1], tmp])
+
+    return res
+
+
+def symbol_sequence_baskets(X, s_id, n_alphabet):
     basket_id, basket = symbol_baskets(X, n_alphabet)
-    s_id = [[id] for i in range(len(basket_id))]
 
     s_basket = []
-    for i in range(len(s_id)):
-        s_basket.append([s_id[i], basket_id[i], basket[i]])
+    for i in range(len(basket_id)):
+        s_basket.append([s_id, basket_id[i], basket[i]])
+    s_basket = np.array(s_basket)
 
-    print(np.array(s_basket))
-
-    from pycspade.helpers import spade, print_result
-
-    # To get raw SPADE output
-    result = spade(data=s_basket, support=0.3, parse=False)
-    print_result(result)
-
+    return s_basket
 
 
 if __name__ == "__main__":
