@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from apyori import apriori
-from pycspade.helpers import spade, print_result
+from pycspade.helpers import spade
 
 
 def association_rule_discovery(basket, **kwargs):
@@ -21,19 +21,19 @@ def association_rule_discovery(basket, **kwargs):
 
 
 def sequential_rule_discovery(s_basket, s_list, **kwargs):
-    support = kwargs["support"]
+    support = kwargs["min_support"]
     parse = kwargs["parse"]
-    maxlen = kwargs["maxlen"]
-    result = spade(data=s_basket, support=support, parse=parse, maxlen=maxlen)
+    length = kwargs["max_length"]
+    result = spade(data=s_basket, support=support, parse=parse, maxlen=length)
 
     res = []
     for mined_object in result['mined_objects']:
-        #  Occurs, Accum, Support, Confid, Lift, Sequence
+        # Occurs, Accum, Support, Confid, Lift, Sequence
         res.append([mined_object.noccurs,
                     mined_object.accum_occurs,
                     mined_object.noccurs / result['nsequences'],
                     mined_object.confidence if mined_object.confidence else 'N/A',
                     mined_object.lift if mined_object.lift else 'N/A',
-                    [s_list[int(str(i).replace('(','').replace(')',''))] for i in mined_object.items]])
+                    [s_list[int(str(i).replace('(', '').replace(')', ''))] for i in mined_object.items]])
 
     return res

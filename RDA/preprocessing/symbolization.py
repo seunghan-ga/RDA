@@ -107,14 +107,8 @@ def symbol_baskets(X, n_alphabet):
             idx_t = np.where(line == upper)[0]
             idx_b = np.where(line == lower)[0]
 
-            t_line, b_line = [], []
-            for ti in idx_t:
-                t_line.append("%s.%s" % (ti, line[ti]))
-            for bi in idx_b:
-                b_line.append("%s.%s" % (bi, line[bi]))
-
-            # t_line = ["%s.%s" % (ti, line[ti]) for ti in idx_t]
-            # b_line = ["%s.%s" % (bi, line[bi]) for bi in idx_b]
+            t_line = ["%s.%s" % (ti, line[ti]) for ti in idx_t]
+            b_line = ["%s.%s" % (bi, line[bi]) for bi in idx_b]
             items = np.concatenate((b_line, t_line)).tolist()
 
             basket_id.append(i)

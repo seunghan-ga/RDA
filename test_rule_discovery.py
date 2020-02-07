@@ -45,14 +45,19 @@ if __name__ == "__main__":
     s1_basket = symbolization.symbol_sequence_baskets(sax_s1, 1, n_alphabet)
     s2_basket = symbolization.symbol_sequence_baskets(sax_s2, 2, n_alphabet)
 
-    kwargs = {"max_length": 3, "min_support": 0.1, "min_confidenc": 0.5, "min_lift": 2}
+    kwargs = {"max_length": 2, "min_support": 0.1, "min_confidenc": 0.5, "min_lift": 2}
     res = ruleDiscovery.association_rule_discovery(basket, **kwargs)
-    print(res)
+    cols = ['base', 'add', 'confidence', 'lift']
+    df1 = pd.DataFrame(res, columns=cols)
 
     s_baskets = np.concatenate((s1_basket, s2_basket)).tolist()
     s_list = symbolization.flatten_unique(s_baskets)
     s_baskets_convert = symbolization.idx_value_convert(s_baskets, s_list)
-    print(s_list)
-    kwargs = {"support": 0.3, "parse": True, "maxlen": 3}
+
+    kwargs = {"min_support": 0.3, "parse": True, "max_length": 2}
     res = ruleDiscovery.sequential_rule_discovery(s_baskets_convert, s_list, **kwargs)
-    print(np.array(res))
+    cols = ['Occurs', 'Accum', 'Support', 'Confid', 'Lift', 'Sequence']
+    df2 = pd.DataFrame(res, columns=cols)
+
+    print(df1)
+    print(df2)
