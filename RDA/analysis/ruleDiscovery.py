@@ -5,10 +5,10 @@ from pycspade.helpers import spade
 
 def association_rule_discovery(basket, **kwargs):
     """
-
-    :param basket:
-    :param kwargs:
-    :return:
+    association rule discovery
+    :param basket: symbol baskets
+    :param kwargs: apriori arguments
+    :return: rule discovery result
     """
     support = kwargs.get('min_support', 0.1)
     confidence = kwargs.get('min_confidence', 0.0)
@@ -28,11 +28,11 @@ def association_rule_discovery(basket, **kwargs):
 
 def sequential_rule_discovery(s_basket, s_list, **kwargs):
     """
-
-    :param s_basket:
-    :param s_list:
-    :param kwargs:
-    :return:
+    sequential rule discovery
+    :param s_basket: symbol sequence basket
+    :param s_list: converted array (1N, symbol -> index)
+    :param kwargs: spade arguments
+    :return: rule discovery result
     """
     support = kwargs["min_support"]
     parse = kwargs["parse"]

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from tqdm import tqdm
 import numpy as np
-import sys
 
 
 def z_score_norm(X):
@@ -19,16 +18,20 @@ def z_score_norm(X):
 
 def index_segmentation(n, n_seg=None, n_window=None):
     """
-
-    :param n:
-    :param n_window:
-    :param n_seg:
-    :return:
+    Index segmentation.
+    :param n: Input array
+    :param n_window: window size
+    :param n_seg: segmentation size
+    :return: start, end index list
     """
     st, ed = [], []
-    if n_window is None:
+    if n_seg is not None and n_window is not None:
+        return -1
+    if n_seg is None and n_window is None:
+        return -1
+    if n_seg is not None and n_window is None:
         n_window = int(np.ceil(n / n_seg))
-    if n_seg is None:
+    if n_window is not None and n_seg is None:
         n_seg = int(np.ceil(n / n_window))
     n_last = int(n % n_seg)
     for i in range(n_seg):
@@ -42,11 +45,11 @@ def index_segmentation(n, n_seg=None, n_window=None):
 
 def paa(X, n_seg=None, n_window=None):
     """
-
-    :param X:
-    :param n_window:
-    :param n_seg:
-    :return:
+    Piecewise Aggregate Approximation.
+    :param X: Input array
+    :param n_window: window size
+    :param n_seg: segmentation size
+    :return: ppa array
     """
     n_variable, n_timeseries = X.T.shape
     st, ed = None, None
@@ -67,10 +70,10 @@ def paa(X, n_seg=None, n_window=None):
 
 def sax(X, n_alphabet=3):
     """
-
-    :param X:
-    :param n_alphabet:
-    :return:
+    Symbolic Aggregate approXimation.
+    :param X: Input array
+    :param n_alphabet: alphabet size (percentage. n/n_alphabet)
+    :return: sax array
     """
     per = [(100/n_alphabet) * i for i in range(n_alphabet)]
 
@@ -90,10 +93,10 @@ def sax(X, n_alphabet=3):
 
 def symbol_baskets(X, n_alphabet):
     """
-
-    :param X:
-    :param n_alphabet:
-    :return:
+    Symbol basket Generation.
+    :param X: Input array
+    :param n_alphabet: alphabet size (percentage. n/n_alphabet)
+    :return: basket id, basket
     """
     lower, upper = chr(97), chr(97+(n_alphabet-1))
     basket = []
@@ -117,7 +120,30 @@ def symbol_baskets(X, n_alphabet):
     return basket_id, basket
 
 
+def symbol_sequence_baskets(X, s_id, n_alphabet):
+    """
+    symbol sequence basket generation
+    :param X: sax array
+    :param s_id: sequential id
+    :param n_alphabet: alphabet size (percentage. n/n_alphabet)
+    :return: symbol sequence basket
+    """
+    basket_id, basket = symbol_baskets(X, n_alphabet)
+
+    s_basket = []
+    for i in range(len(basket_id)):
+        s_basket.append([s_id, basket_id[i], basket[i]])
+    s_basket = np.array(s_basket)
+
+    return s_basket
+
+
 def flatten_unique(X):
+    """
+    Convert 2N array to 1N array.
+    :param X: symbol sequence basket
+    :return: flatten array
+    """
     unique = []
     for line in X:
         unique = np.concatenate((unique, line[2]))
@@ -128,6 +154,12 @@ def flatten_unique(X):
 
 
 def idx_value_convert(X, idx):
+    """
+    Convert basket value to index
+    :param X: symbol sequence basket
+    :param idx: flatten array (symbol sequence basket)
+    :return: converted array
+    """
     res = []
     for i in range(len(X)):
         tmp = []
@@ -136,17 +168,6 @@ def idx_value_convert(X, idx):
         res.append([X[i][0], X[i][1], tmp])
 
     return res
-
-
-def symbol_sequence_baskets(X, s_id, n_alphabet):
-    basket_id, basket = symbol_baskets(X, n_alphabet)
-
-    s_basket = []
-    for i in range(len(basket_id)):
-        s_basket.append([s_id, basket_id[i], basket[i]])
-    s_basket = np.array(s_basket)
-
-    return s_basket
 
 
 if __name__ == "__main__":
