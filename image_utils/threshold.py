@@ -24,7 +24,7 @@ def otsu_threshold(x):
         meanH = np.mean(float(wH))
         cVal = wL * wH * (meanL - meanH) ** 2
         if cVal > cMax:
-            cMax, tht = cVal, t
+            cMax, thr = cVal, t
 
     thr_mat = x.copy()
     thr_mat[thr_mat < thr] = 0

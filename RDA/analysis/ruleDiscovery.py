@@ -4,6 +4,12 @@ from pycspade.helpers import spade
 
 
 def association_rule_discovery(basket, **kwargs):
+    """
+
+    :param basket:
+    :param kwargs:
+    :return:
+    """
     support = kwargs.get('min_support', 0.1)
     confidence = kwargs.get('min_confidence', 0.0)
     lift = kwargs.get('min_lift', 0.0)
@@ -21,6 +27,13 @@ def association_rule_discovery(basket, **kwargs):
 
 
 def sequential_rule_discovery(s_basket, s_list, **kwargs):
+    """
+
+    :param s_basket:
+    :param s_list:
+    :param kwargs:
+    :return:
+    """
     support = kwargs["min_support"]
     parse = kwargs["parse"]
     length = kwargs["max_length"]
