@@ -1,4 +1,3 @@
-import image_utils
 import numpy as np
 
 
@@ -10,9 +9,9 @@ def dct_reconstruction(x, cutoff=1.0):
     :return: Reconstructed background array.
     """
     height, width = x.shape
-    dct_mat = image_utils.fft.dct2d(x)
-    cutoff_mat = image_utils.fft.LPF(dct_mat, height, width, cutoff)
-    idct_mat = image_utils.fft.idct2d(cutoff_mat)
+    dct_mat = IDA.image_utils.fft.dct2d(x)
+    cutoff_mat = IDA.image_utils.fft.LPF(dct_mat, height, width, cutoff)
+    idct_mat = IDA.image_utils.fft.idct2d(cutoff_mat)
 
     return idct_mat
 

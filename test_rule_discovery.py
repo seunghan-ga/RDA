@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from RDA.preprocessing import symbolization
 from RDA.analysis import ruleDiscovery
-from RDA.databases import hadoop
+from common.databases import hadoop
 import numpy as np
 import pandas as pd
 

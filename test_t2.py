@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 from RDA.preprocessing import normalization as normalizer
-from RDA.databases import hadoop
-from RDA.statistics import common
+from common.databases import hadoop
 from RDA.statistics import mspc
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
 
 if __name__ == "__main__":
     db_info = {
