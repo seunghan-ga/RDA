@@ -16,7 +16,7 @@ if __name__ == "__main__":
     connector.connect(**db_info)
     all_data = connector.select('select * from kddcup limit 100;')
     features = all_data.columns.tolist()
-    s1_data_norm = symbolization.z_score_norm(all_data[features[4:-1]].to_numpy()[:10])
+    s1_data_norm = symbolization.z_score_norm(all_data[features[4:-1]].to_numpy()[0:10])
     s2_data_norm = symbolization.z_score_norm(all_data[features[4:-1]].to_numpy()[5:15])
     connector.close()
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     kwargs = {"max_length": 2, "min_support": 0.1, "min_confidence": 0.5, "min_lift": 2}
     res = ruleDiscovery.association_rule_discovery(basket, **kwargs)
-    cols = ['base', 'add', 'confidence', 'lift']
+    cols = ['items', 'support', 'base', 'add', 'confidence', 'lift']
     df1 = pd.DataFrame(res, columns=cols)
 
     s_baskets = np.concatenate((s1_basket, s2_basket)).tolist()

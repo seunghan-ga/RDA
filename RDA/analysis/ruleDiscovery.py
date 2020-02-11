@@ -20,8 +20,8 @@ def association_rule_discovery(basket, **kwargs):
     res = []
     for line in rules:
         for item in line[2]:
-            # base, add, confidence, lift
-            res.append([list(item[0]), list(item[1]), item[2], item[3]])
+            # items, support, base, add, confidence, lift
+            res.append([list(line[0]), line[1], list(item[0]), list(item[1]), item[2], item[3]])
 
     return res
 
